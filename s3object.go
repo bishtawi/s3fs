@@ -1,12 +1,19 @@
 package s3fs
 
-import "os"
+import (
+	"os"
+
+	"github.com/aws/aws-sdk-go/service/s3"
+)
 
 // s3object implements http.File
-type s3object struct{}
+type s3object struct {
+	key            string
+	s3ObjectOutput *s3.GetObjectOutput
+}
 
 func (o *s3object) Close() error {
-	return errNotYetImplemented
+	return o.s3ObjectOutput.Body.Close()
 }
 
 func (o *s3object) Read(p []byte) (n int, err error) {
@@ -22,5 +29,5 @@ func (o *s3object) Readdir(count int) ([]os.FileInfo, error) {
 }
 
 func (o *s3object) Stat() (os.FileInfo, error) {
-	return &s3objectInfo{}, errNotYetImplemented
+	return &s3objectInfo{o.key, o.s3ObjectOutput}, nil
 }
