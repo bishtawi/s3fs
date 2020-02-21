@@ -1,0 +1,32 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Test
+    strategy:
+      matrix:
+        os: ["ubuntu-latest"]
+        go: ["1.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-go@v1
+        with:
+          go-version: ${{ matrix.go }}
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Install
+        run: |
+          yarn
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.23.6
+      - name: Build
+        run: make build
+      - name: Test
+        run: make test
+      - name: Lint
+        run: |
+          # https://github.com/actions/setup-go/issues/14
+          export PATH="${PATH}:$(go env GOPATH)/bin"
+          make lint

@@ -1,0 +1,21 @@
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+linters:
+  enable-all: true
+linters-settings:
+  funlen:
+    lines: 100
+    statements: 50
+  gocyclo:
+    min-complexity: 20
+  goimports:
+    local-prefixes: github.com/bishtawi/s3fs
+  golint:
+    min-confidence: 0
+  lll:
+    line-length: 140
+  maligned:
+    suggest-new: true
+  misspell:
+    locale: US
