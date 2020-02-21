@@ -2,17 +2,10 @@ version: "3"
 
 services:
   localstack:
-    image: localstack/localstack:latest
-    container_name: localstack
-    hostname: localstack
+    image: docker.pkg.github.com/bishtawi/s3fs/localstack:${DOCKER_TAG:-test}
+    build: ./docker/localstack
     restart: unless-stopped
     ports:
       - 4572:4572
-      - 8080:8080
     environment:
-      SERVICES: s3:4572
-      DATA_DIR: /opt/localstack/data
-      PORT_WEB_UI: 8080
-      START_WEB: 1
-    volumes:
-      - ./.localstack-data:/opt/localstack/data
+      START_WEB: 0

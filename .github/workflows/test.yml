@@ -1,4 +1,4 @@
-name: ci
+name: test
 
 on: [push, pull_request]
 
@@ -12,11 +12,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     services:
       localstack:
-        image: localstack/localstack:latest
+        image: docker.pkg.github.com/bishtawi/s3fs/localstack:latest
         ports:
           - 4572:4572
         env:
-          SERVICES: s3:4572
           START_WEB: 0
     steps:
       - uses: actions/setup-go@v1
@@ -31,10 +30,11 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.23.6
       - name: Build
         run: make build
+      - name: Docker
+        run: docker login -u bishtawi -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
       - name: Test
         run: make test
       - name: Lint
         run: |
-          # https://github.com/actions/setup-go/issues/14
-          export PATH="${PATH}:$(go env GOPATH)/bin"
+          export PATH="${PATH}:$(go env GOPATH)/bin" # https://github.com/actions/setup-go/issues/14
           make lint

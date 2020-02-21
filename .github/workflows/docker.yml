@@ -1,0 +1,19 @@
+name: docker
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: Init
+        run: docker login -u bishtawi -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
+      - name: Build
+        run: ./scripts/ci/build-localstack.sh
