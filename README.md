@@ -4,8 +4,6 @@ Golang library that implements the [http.FileSystem](https://godoc.org/net/http#
 
 ![](https://github.com/bishtawi/s3fs/workflows/ci/badge.svg)
 
-## Todo
+## In progress
 
-- Actual implementation
 - Tests
-- Integration tests with [LocalStack](https://github.com/localstack/localstack)

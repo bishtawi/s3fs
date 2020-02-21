@@ -12,6 +12,7 @@ import (
 type s3objectInfo struct {
 	key            string
 	s3ObjectOutput *s3.GetObjectOutput
+	s3Object       *s3.Object
 }
 
 func (i *s3objectInfo) Name() string {
@@ -19,21 +20,45 @@ func (i *s3objectInfo) Name() string {
 }
 
 func (i *s3objectInfo) Size() int64 {
-	return aws.Int64Value(i.s3ObjectOutput.ContentLength)
+	if i.s3ObjectOutput != nil {
+		return aws.Int64Value(i.s3ObjectOutput.ContentLength)
+	}
+
+	if i.s3Object != nil {
+		return aws.Int64Value(i.s3Object.Size)
+	}
+
+	return 0
 }
 
 func (i *s3objectInfo) Mode() os.FileMode {
-	return os.ModeIrregular
+	if i.s3ObjectOutput != nil || i.s3Object != nil {
+		return os.ModePerm
+	}
+
+	return os.ModeDir
 }
 
 func (i *s3objectInfo) ModTime() time.Time {
-	return aws.TimeValue(i.s3ObjectOutput.LastModified)
+	if i.s3ObjectOutput != nil {
+		return aws.TimeValue(i.s3ObjectOutput.LastModified)
+	}
+
+	if i.s3Object != nil {
+		return aws.TimeValue(i.s3Object.LastModified)
+	}
+
+	return time.Time{}
 }
 
 func (i *s3objectInfo) IsDir() bool {
-	return false
+	return i.s3ObjectOutput == nil && i.s3Object == nil
 }
 
 func (i *s3objectInfo) Sys() interface{} {
-	return i.s3ObjectOutput
+	if i.s3ObjectOutput != nil {
+		return i.s3ObjectOutput
+	}
+
+	return i.s3Object
 }

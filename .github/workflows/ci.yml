@@ -10,6 +10,14 @@ jobs:
         os: ["ubuntu-latest"]
         go: ["1.13"]
     runs-on: ${{ matrix.os }}
+    services:
+      localstack:
+        image: localstack/localstack:latest
+        ports:
+          - 4572:4572
+        env:
+          SERVICES: s3:4572
+          START_WEB: 0
     steps:
       - uses: actions/setup-go@v1
         with:

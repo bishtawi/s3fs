@@ -16,3 +16,6 @@
 
 # NodeJS
 node_modules
+
+# Localstack
+.localstack-data

@@ -2,6 +2,7 @@ package s3fs
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -10,11 +11,19 @@ import (
 
 // s3fs implements http.FileSystem
 type s3fs struct {
-	bucket   string
 	s3client s3iface.S3API
+	bucket   string
 }
 
 func (s *s3fs) Open(name string) (http.File, error) {
+	if strings.HasSuffix(name, "/") {
+		return &s3object{
+			s3client: s.s3client,
+			bucket:   s.bucket,
+			key:      name,
+		}, nil
+	}
+
 	getObjectOutput, err := s.s3client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(name),
@@ -23,5 +32,10 @@ func (s *s3fs) Open(name string) (http.File, error) {
 		return nil, err
 	}
 
-	return &s3object{name, getObjectOutput}, nil
+	return &s3object{
+		s3client:       s.s3client,
+		bucket:         s.bucket,
+		key:            name,
+		s3ObjectOutput: getObjectOutput,
+	}, nil
 }
