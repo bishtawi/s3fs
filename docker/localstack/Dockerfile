@@ -5,7 +5,7 @@ ENV DATA_DIR=/opt/localstack-data
 COPY init.sh .
 COPY data data
 
-RUN ./init.sh
+RUN ./init.sh true
 
 
 FROM localstack/localstack:latest

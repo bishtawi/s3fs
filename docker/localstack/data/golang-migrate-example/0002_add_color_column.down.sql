@@ -1,0 +1,1 @@
+ALTER TABLE animal DROP COLUMN color;

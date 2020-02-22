@@ -9,3 +9,20 @@ services:
       - 4572:4572
     environment:
       START_WEB: 0
+  # localstack-official:
+  #   image: localstack/localstack:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - 4572:4572
+  #   environment:
+  #     SERVICES: s3:4572
+  #     START_WEB: 0
+  #   volumes:
+  #     - ./docker/localstack:/docker-entrypoint-initaws.d/
+  postgres:
+    image: postgres:11-alpine
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: insecure-password

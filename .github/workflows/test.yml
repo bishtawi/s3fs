@@ -12,11 +12,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     services:
       localstack:
-        image: docker.pkg.github.com/bishtawi/s3fs/localstack:latest
+        image: localstack/localstack:latest
         ports:
           - 4572:4572
         env:
+          SERVICES: s3:4572
           START_WEB: 0
+        volumes:
+          - ./docker/localstack:/docker-entrypoint-initaws.d/
+      postgres:
+        image: postgres:11-alpine
+        ports:
+          - 5433:5432
+        env:
+          POSTGRES_PASSWORD: insecure-password
     steps:
       - uses: actions/setup-go@v1
         with:
@@ -30,11 +39,11 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.23.6
       - name: Build
         run: make build
-      - name: Docker
-        run: docker login -u bishtawi -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
-      - name: Test
-        run: make test
       - name: Lint
         run: |
           export PATH="${PATH}:$(go env GOPATH)/bin" # https://github.com/actions/setup-go/issues/14
           make lint
+      - name: Test
+        run: |
+          sleep 60 # Wait for localstack and postgres to boot up
+          make test

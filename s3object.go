@@ -1,6 +1,7 @@
 package s3fs
 
 import (
+	"io"
 	"os"
 	"strings"
 
@@ -15,6 +16,7 @@ type s3object struct {
 	bucket         string
 	key            string
 	s3ObjectOutput *s3.GetObjectOutput
+	read           bool
 }
 
 func (o *s3object) Close() error {
@@ -27,6 +29,7 @@ func (o *s3object) Close() error {
 
 func (o *s3object) Read(p []byte) (n int, err error) {
 	if o.s3ObjectOutput != nil {
+		o.read = true
 		return o.s3ObjectOutput.Body.Read(p)
 	}
 
@@ -34,6 +37,10 @@ func (o *s3object) Read(p []byte) (n int, err error) {
 }
 
 func (o *s3object) Seek(offset int64, whence int) (int64, error) {
+	if (!o.read && offset == 0 && whence == io.SeekStart) || (offset == 0 && whence == io.SeekCurrent) {
+		return 0, nil
+	}
+
 	return 0, ErrNotSupported
 }
 

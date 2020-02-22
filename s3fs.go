@@ -26,7 +26,7 @@ func (s *s3fs) Open(name string) (http.File, error) {
 
 	getObjectOutput, err := s.s3client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(name),
+		Key:    aws.String(strings.Trim(name, "/")),
 	})
 	if err != nil {
 		return nil, err
