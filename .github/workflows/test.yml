@@ -10,33 +10,43 @@ jobs:
         os: ["ubuntu-latest"]
         go: ["1.13"]
     runs-on: ${{ matrix.os }}
-    services:
-      localstack:
-        image: localstack/localstack:latest
-        ports:
-          - 4572:4572
-        env:
-          SERVICES: s3:4572
-          START_WEB: 0
-        volumes:
-          - ./docker/localstack:/docker-entrypoint-initaws.d/
-      postgres:
-        image: postgres:11-alpine
-        ports:
-          - 5433:5432
-        env:
-          POSTGRES_PASSWORD: insecure-password
+    # services:
+    #   localstack:
+    #     image: localstack/localstack:latest # docker.pkg.github.com/bishtawi/s3fs/localstack:latest
+    #     ports:
+    #       - 4572:4572
+    #     env:
+    #       SERVICES: s3:4572
+    #       START_WEB: 0
+    #     volumes:
+    #       - /home/runner/work/s3fs/s3fs/docker/localstack:/docker-entrypoint-initaws.d
+    #   postgres:
+    #     image: postgres:11-alpine
+    #     ports:
+    #       - 5433:5432
+    #     env:
+    #       POSTGRES_PASSWORD: insecure-password
     steps:
+      - uses: actions/checkout@v2
+      - name: Docker
+        run: |
+          docker login -u bishtawi -p ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
+          docker-compose pull
+          docker-compose up --detach
       - uses: actions/setup-go@v1
         with:
           go-version: ${{ matrix.go }}
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 1
       - name: Install
         run: |
           yarn
+          yarn global add snyk
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.23.6
+      - name: Security
+        run: |
+          export PATH="${PATH}:$(yarn global bin)" # https://github.com/actions/setup-node/issues/85
+          make security
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       - name: Build
         run: make build
       - name: Lint
@@ -44,6 +54,4 @@ jobs:
           export PATH="${PATH}:$(go env GOPATH)/bin" # https://github.com/actions/setup-go/issues/14
           make lint
       - name: Test
-        run: |
-          sleep 60 # Wait for localstack and postgres to boot up
-          make test
+        run: make test

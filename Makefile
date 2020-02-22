@@ -12,3 +12,7 @@ lint:
 format:
 	@golangci-lint run --enable-all --fix
 	@find . \( -iname "*.yml" -o -iname "*.yaml" -o -iname "*.md" -o -iname "*.json" -o -iname ".prettierrc" \) -exec npx prettier --write {} +
+
+security:
+	@yarn audit
+	@snyk test --all-projects --dev
