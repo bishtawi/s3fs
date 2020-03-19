@@ -10,9 +10,13 @@ jobs:
         os: ["ubuntu-latest"]
         go: ["1.13"]
     runs-on: ${{ matrix.os }}
+    ## Commenting out this block for a few reasons
+    ## 1. We cant use docker.pkg.github.com/bishtawi/s3fs/localstack:latest because at this point in time Github CI isnt logged into the docker repo to pull down the image
+    ## 2. We cant use localstack/localstack:latest with a volume mounted init script as at this point in time Github CI hasnt checked out our git repo
+    ## So current solution is to run docker-compose to bring up our services as a build step (done below)
     # services:
     #   localstack:
-    #     image: localstack/localstack:latest # docker.pkg.github.com/bishtawi/s3fs/localstack:latest
+    #     image: localstack/localstack:latest # docker.pkg.github.com/bishtawi/s3fs/localstack:latest # Github CI does not support running services from private docker images at the moment
     #     ports:
     #       - 4572:4572
     #     env:

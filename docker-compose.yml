@@ -9,6 +9,8 @@ services:
       - 4572:4572
     environment:
       START_WEB: 0
+  ## Instead of pulling my private docker image which already has the files preloaded into the mock s3 bucket at build time,
+  ## we can also use the official localstack image and then volume mount the init script to load the files into the mock s3 at run-time
   # localstack-official:
   #   image: localstack/localstack:latest
   #   restart: unless-stopped

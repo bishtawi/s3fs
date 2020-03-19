@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -17,6 +18,7 @@ type s3object struct {
 	key            string
 	s3ObjectOutput *s3.GetObjectOutput
 	read           bool
+	lock           sync.Mutex
 }
 
 func (o *s3object) Close() error {
@@ -29,14 +31,25 @@ func (o *s3object) Close() error {
 
 func (o *s3object) Read(p []byte) (n int, err error) {
 	if o.s3ObjectOutput != nil {
+		o.lock.Lock()
+		defer o.lock.Unlock()
+
 		o.read = true
+
 		return o.s3ObjectOutput.Body.Read(p)
 	}
 
 	return 0, os.ErrInvalid // Object is a directory, cannot read it
 }
 
+// Seek is technically unsupported due to the fact that the underlying S3 object does not implement the Seeker interface
+// However, we can support a few scenarios where no seeking actually occurs
+// 1. Seeking to the start of a file when no reading has occurred yet
+// 2. Seeking to the current position
 func (o *s3object) Seek(offset int64, whence int) (int64, error) {
+	o.lock.Lock()
+	defer o.lock.Unlock()
+
 	if (!o.read && offset == 0 && whence == io.SeekStart) || (offset == 0 && whence == io.SeekCurrent) {
 		return 0, nil
 	}
