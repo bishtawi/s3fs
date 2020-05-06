@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 )
 
-// s3fs implements http.FileSystem
+// s3fs implements http.FileSystem.
 type s3fs struct {
 	s3client s3iface.S3API
 	bucket   string
@@ -26,7 +26,7 @@ func (s *s3fs) Open(name string) (http.File, error) {
 
 	getObjectOutput, err := s.s3client.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(s.bucket),
-		Key:    aws.String(strings.Trim(name, "/")),
+		Key:    aws.String(strings.TrimLeft(name, "/")),
 	})
 	if err != nil {
 		return nil, err

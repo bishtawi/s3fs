@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 )
 
-// s3object implements http.File
+// s3object implements http.File.
 type s3object struct {
 	s3client       s3iface.S3API
 	bucket         string
@@ -42,16 +42,18 @@ func (o *s3object) Read(p []byte) (n int, err error) {
 	return 0, os.ErrInvalid // Object is a directory, cannot read it
 }
 
-// Seek is technically unsupported due to the fact that the underlying S3 object does not implement the Seeker interface
-// However, we can support a few scenarios where no seeking actually occurs
-// 1. Seeking to the start of a file when no reading has occurred yet
-// 2. Seeking to the current position
+// Seek is technically unsupported due to the fact that the underlying S3 object does not implement the Seeker interface.
+// However, we can support a few scenarios where no seeking actually occurs.
+// 1. Seeking to the start of a file when no reading has occurred yet.
+// 2. Seeking to the current position.
 func (o *s3object) Seek(offset int64, whence int) (int64, error) {
-	o.lock.Lock()
-	defer o.lock.Unlock()
+	if o.s3ObjectOutput != nil {
+		o.lock.Lock()
+		defer o.lock.Unlock()
 
-	if (!o.read && offset == 0 && whence == io.SeekStart) || (offset == 0 && whence == io.SeekCurrent) {
-		return 0, nil
+		if (!o.read && offset == 0 && whence == io.SeekStart) || (offset == 0 && whence == io.SeekCurrent) {
+			return 0, nil
+		}
 	}
 
 	return 0, ErrNotSupported
@@ -62,36 +64,33 @@ func (o *s3object) Readdir(count int) ([]os.FileInfo, error) {
 		return nil, os.ErrInvalid // Object is a file, cannot read the directory
 	}
 
-	var marker *string
-
-	var fileInfos []os.FileInfo
+	var (
+		continuationToken *string
+		fileInfos         []os.FileInfo
+	)
 
 	for {
-		listObjectsOutput, err := o.s3client.ListObjects(&s3.ListObjectsInput{
-			Bucket:    aws.String(o.bucket),
-			Delimiter: aws.String("/"),
-			Prefix:    aws.String(strings.Trim(o.key, "/")),
-			Marker:    marker,
-			MaxKeys:   aws.Int64(int64(count)),
+		listObjectsV2Output, err := o.s3client.ListObjectsV2(&s3.ListObjectsV2Input{
+			Bucket:            aws.String(o.bucket),
+			Delimiter:         aws.String("/"),
+			Prefix:            aws.String(strings.TrimLeft(o.key, "/")),
+			ContinuationToken: continuationToken,
+			MaxKeys:           aws.Int64(int64(count)),
 		})
 		if err != nil {
 			return nil, err
 		}
 
-		for _, object := range listObjectsOutput.Contents {
+		for _, object := range listObjectsV2Output.Contents {
 			fileInfos = append(fileInfos, &s3objectInfo{
 				key:      aws.StringValue(object.Key),
 				s3Object: object,
 			})
 		}
 
-		if aws.BoolValue(listObjectsOutput.IsTruncated) {
-			if listObjectsOutput.NextMarker != nil {
-				marker = listObjectsOutput.NextMarker
-			} else {
-				marker = listObjectsOutput.Contents[len(listObjectsOutput.Contents)-1].Key
-			}
-		} else {
+		continuationToken = listObjectsV2Output.NextContinuationToken
+
+		if !aws.BoolValue(listObjectsV2Output.IsTruncated) || listObjectsV2Output.NextContinuationToken == nil {
 			break
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-// s3objectInfo implements os.FileInfo
+// s3objectInfo implements os.FileInfo.
 type s3objectInfo struct {
 	key            string
 	s3ObjectOutput *s3.GetObjectOutput

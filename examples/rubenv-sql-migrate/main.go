@@ -10,7 +10,8 @@ import (
 	migrate "github.com/rubenv/sql-migrate"
 )
 
-func rubenvSQLMigrateExample(dbconn string, bucket string, s3client s3iface.S3API) (*sql.DB, int, error) {
+// RubenvSQLMigrateExample runs Postgres SQL migrations from an S3 bucket and returns the database connection object.
+func RubenvSQLMigrateExample(dbconn string, bucket string, s3client s3iface.S3API) (*sql.DB, int, error) {
 	fs, err := s3fs.NewWithS3Client(bucket, s3client)
 	if err != nil {
 		return nil, 0, err

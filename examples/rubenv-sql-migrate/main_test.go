@@ -1,4 +1,4 @@
-package rubenvsqlmigrateexample
+package rubenvsqlmigrateexample_test
 
 import (
 	"testing"
@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stretchr/testify/require"
+
+	rubenvSQLMigrate "github.com/bishtawi/s3fs/examples/rubenv-sql-migrate"
 )
 
 const (
@@ -23,7 +25,7 @@ func Test_rubenvSQLMigrateExample(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	db, n, err := rubenvSQLMigrateExample(dbconn, bucket, s3.New(sess))
+	db, n, err := rubenvSQLMigrate.RubenvSQLMigrateExample(dbconn, bucket, s3.New(sess))
 	defer func() {
 		if db != nil {
 			db.Exec("DROP TABLE people; DROP TABLE gorp_migrations;")

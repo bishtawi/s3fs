@@ -1,4 +1,4 @@
-package golangmigrateexample
+package golangmigrateexample_test
 
 import (
 	"testing"
@@ -7,6 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stretchr/testify/require"
+
+	golangmigrate "github.com/bishtawi/s3fs/examples/golang-migrate"
 )
 
 const (
@@ -23,7 +25,7 @@ func Test_golangMigrateExample(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	db, err := golangMigrateExample(dbconn, bucket, s3.New(sess))
+	db, err := golangmigrate.GolangMigrateExample(dbconn, bucket, s3.New(sess))
 	defer func() {
 		if db != nil {
 			db.Exec("DROP TABLE animal; DROP TABLE schema_migrations;")

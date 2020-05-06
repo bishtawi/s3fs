@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest"]
-        go: ["1.13"]
+        go: ["1.14"]
     runs-on: ${{ matrix.os }}
     ## Commenting out this block for a few reasons
     ## 1. We cant use docker.pkg.github.com/bishtawi/s3fs/localstack:latest because at this point in time Github CI isnt logged into the docker repo to pull down the image
@@ -44,7 +44,7 @@ jobs:
         run: |
           yarn
           yarn global add snyk
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.23.6
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.26.0
       - name: Security
         run: |
           export PATH="${PATH}:$(yarn global bin)" # https://github.com/actions/setup-node/issues/85

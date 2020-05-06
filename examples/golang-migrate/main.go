@@ -8,14 +8,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/aws_s3" // Required import
 	awss3 "github.com/golang-migrate/migrate/v4/source/aws_s3"
 	_ "github.com/lib/pq" // required
 )
 
 // TODO: Switch to use filesystem instead of native aws
 
-func golangMigrateExample(dbconn string, bucket string, s3client s3iface.S3API) (*sql.DB, error) {
+// GolangMigrateExample runs Postgres migrations from an S3 bucket and returns the database connection object.
+func GolangMigrateExample(dbconn string, bucket string, s3client s3iface.S3API) (*sql.DB, error) {
 	_, err := s3fs.NewWithS3Client(bucket, s3client)
 	if err != nil {
 		return nil, err
