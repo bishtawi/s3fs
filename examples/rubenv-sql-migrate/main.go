@@ -23,5 +23,6 @@ func RubenvSQLMigrateExample(dbconn string, bucket string, s3client s3iface.S3AP
 	}
 
 	n, err := migrate.Exec(db, "postgres", &migrate.HttpFileSystemMigrationSource{FileSystem: fs}, migrate.Up)
+
 	return db, n, err
 }

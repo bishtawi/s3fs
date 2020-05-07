@@ -60,7 +60,7 @@ func TestNewWithS3Client(t *testing.T) {
 		for _, fileInfo := range fileInfos {
 			require.False(t, fileInfo.IsDir())
 			require.NotEqual(t, time.Time{}, fileInfo.ModTime())
-			require.NotEqual(t, os.ModeDir, fileInfo.Mode())
+			require.Zero(t, fileInfo.Mode())
 			require.NotEmpty(t, fileInfo.Name())
 			require.NotZero(t, fileInfo.Size())
 			require.NotNil(t, fileInfo.Sys())
@@ -137,7 +137,7 @@ func TestNewWithS3Client(t *testing.T) {
 		for _, fileInfo := range fileInfos {
 			require.False(t, fileInfo.IsDir())
 			require.NotEqual(t, time.Time{}, fileInfo.ModTime())
-			require.NotEqual(t, os.ModeDir, fileInfo.Mode())
+			require.Zero(t, fileInfo.Mode())
 			require.NotEmpty(t, fileInfo.Name())
 			require.NotZero(t, fileInfo.Size())
 			require.NotNil(t, fileInfo.Sys())

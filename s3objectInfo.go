@@ -33,7 +33,7 @@ func (i *s3objectInfo) Size() int64 {
 
 func (i *s3objectInfo) Mode() os.FileMode {
 	if i.s3ObjectOutput != nil || i.s3Object != nil {
-		return os.ModePerm
+		return 0 // Is it worth trying to map S3 file permissions to the linux permissions?
 	}
 
 	return os.ModeDir

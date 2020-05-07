@@ -16,6 +16,12 @@ The goal of this tool is to implement the `http.FileSystem` interface on top of 
 
 Take a look at the [examples](./examples) directory to see how you would use this library with other Go libraries to bring AWS S3 support to a package that might not natively support it.
 
+## Install
+
+```bash
+go get github.com/bishtawi/s3fs
+```
+
 ## Usage
 
 ```go
@@ -81,9 +87,13 @@ n, err := migrate.Exec(db, "postgres", &migrate.HttpFileSystemMigrationSource{Fi
 if err != nil {
     // Handle error...
 }
+
+// View other example usages in the `examples/` directory
 ```
 
 ## Limitations
+
+All of the limitations below can be addressed, just requires some extra effort to solve.
 
 1. The `Readdir(count int) ([]os.FileInfo, error)` function of `http.File` interface only returns a list of files in the immediate directory and will not return a list of subdirectories due to a limitation of AWS S3's `ListObjects` operation.
 
@@ -93,14 +103,20 @@ if err != nil {
 
 1. The `ModTime() time.Time` function of `os.FileInfo` interface only works on files. Empty struct is returned for directories.
 
+1. The `Mode() os.FileMode` function of `os.FileInfo` interface is another stub function that returns `0` as I don't know if it is worth trying to map S3 permissions to the linux permission model.
+
 ## Development
 
-Open to contributions via Pull Requests
+Open to contributions via Pull Requests.
 
 ### Testing
 
-Due to this library essentially being a lightweight wrapper around the AWS S3 library, most tests are integration tests and require connecting to an S3 bucket.
-To make testing easier, we are using [localstack](https://github.com/localstack/localstack) which allows us to bring up a local S3 bucket.
+Due to this library essentially being a lightweight wrapper around the AWS S3 library, all tests are integration tests and require connecting to an S3 bucket.
+To make testing easier, we are using [localstack](https://github.com/localstack/localstack) which allows us to bring up a local S3 bucket instead of directly testing on a live S3 bucket.
+
+In addition to testing against S3, we also test compatibility with other Go libraries that use the `http.FileSystem` interface as an input. These tests are located in the [examples](./examples) directory and require connecting to a running postgres instance.
+
+For simplicity, we use docker-compose to easily bring up localstack and postgres.
 
 ```bash
 docker-compose up

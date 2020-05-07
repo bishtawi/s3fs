@@ -2,7 +2,7 @@ build:
 	@go build
 
 test:
-	@AWS_ACCESS_KEY_ID=makefile AWS_SECRET_ACCESS_KEY=localstack go test -race -p 1 -failfast -v ./...
+	@AWS_ACCESS_KEY_ID=makefile AWS_SECRET_ACCESS_KEY=localstack go test -cover -race -p 1 -failfast -v ./...
 
 lint:
 	@golangci-lint run --enable-all
